@@ -7,6 +7,7 @@ const TasksList = ({deleteTask, tasks, modal, toggleTask}) => {
       key={task.id}
       title={task.title}
       completed={task.completed}
+      categories={task.categories}
       deleteTask={deleteTask}
       toggleTask={toggleTask}
       modal={modal}

@@ -13,13 +13,13 @@ const useTask = () => {
   const { startLoading, stopLoading } = useLoading();
 
   const addTask = useCallback(
-    async (title) => {
+    async (title, categories = []) => {
       if (title.trim() === "") return;
 
       const newTask = {
         title,
         completed: false,
-        category: "",
+        categories
       };
 
       try {
@@ -61,7 +61,6 @@ const useTask = () => {
         if (filter.sortBy) {
           params.sortBy = filter.sortBy;
         }
-        console.log("Fetching with params:", params); // Для отладки
         const { data } = await api.get("/tasks", { params });
         console.log("API response:", data);
         setTasks(data);

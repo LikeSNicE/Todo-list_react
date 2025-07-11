@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 import ModalLayout from "../ModalLayout/ModalLayout";
 
-const ModalEditingTaskTitle = ({ closeModal, task, updateTaskField }) => {
+const ModalEditingTaskTitle = ({ closeModal, task, updateFieldTask }) => {
   const [title, setTitle] = useState("");
 
   useEffect(() => {
@@ -19,14 +19,14 @@ const ModalEditingTaskTitle = ({ closeModal, task, updateTaskField }) => {
 
   const handleSave = () => {
     if (title.trim() === "") return;
-    updateTaskField(task.id, { title });
+    updateFieldTask(task.id, { title });
     closeModal();
   };
 
   return (
     <ModalLayout>
       <ModalLayout.Header>
-        <h3 className="text-xl font-semibold text-gray-900">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
           Редактировать название задачи
         </h3>
         <button className="cursor-pointer" onClick={() => closeModal()}>
@@ -38,7 +38,7 @@ const ModalEditingTaskTitle = ({ closeModal, task, updateTaskField }) => {
         <textarea
           value={title}
           onChange={handleChange}
-          className="bg-white border-2 w-full px-4 py-2 min-h-[150px] rounded-lg"
+          className="bg-white border-2 w-full px-4 py-2 min-h-[150px] rounded-lg dark:bg-gray-900"
           placeholder="Новое название задачи..."
         ></textarea>
       </ModalLayout.Body>

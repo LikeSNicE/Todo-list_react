@@ -1,16 +1,27 @@
 import "./App.css";
+
+// hooks 
+import useModal from "./hooks/useModal";
+import useTask from "./hooks/useTask";
+
+// Components
 import HeaderTop from "./components/HeaderTop/HeaderTop";
 import Header from "./components/Header/Header";
 import TasksList from "./components/TasksList/TasksList";
 import BtnCreatingTask from "./components/BtnCreatingTask/BtnCreatingTask";
+import SpinnerLoader from "./components/SpinnerLoader/SpinnerLoader";
+
+// Мodal
 import ModalAddTask from "./components/ModalAddTask/ModalAddTask";
-import useModal from "./hooks/useModal";
-import useTask from "./hooks/useTask";
 import ModalEditingTaskTitle from "./components/ModalEditingTaskTitle/ModalEditingTaskTitle";
+import ModalAddCategoryToTask from "./components/ModalAddCategoryToTask/ModalAddCategoryToTask";
+
+// Context
 import { LoadingProvider } from "./context/LoadingContext";
 import { FilterProvider } from "./context/FilterContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import SpinnerLoader from "./components/SpinnerLoader/SpinnerLoader";
+import { CategoryProvider } from "./context/CategoryContext";
+
 
 function App() {
   return (
@@ -18,7 +29,9 @@ function App() {
       <ThemeProvider>
         <LoadingProvider>
           <FilterProvider>
-            <AppContent />
+            <CategoryProvider>
+              <AppContent />
+            </CategoryProvider>
             <SpinnerLoader />
           </FilterProvider>
         </LoadingProvider>
@@ -49,7 +62,14 @@ const AppContent = () => {
       {modal.activeModal === "modalEditingTaskTitle" && (
         <ModalEditingTaskTitle
           task={task.getTask(modal.modalProps.id)}
-          updateTaskField={task.updateFieldTask}
+          updateFieldTask={task.updateFieldTask}
+          closeModal={modal.closeModal}
+        />
+      )}
+      {modal.activeModal === "modalAddCategoryToTask" && (
+        <ModalAddCategoryToTask
+          task={task.getTask(modal.modalProps.id)}
+          updateFieldTask={task.updateFieldTask}
           closeModal={modal.closeModal}
         />
       )}
