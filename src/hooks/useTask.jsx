@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useFilter } from "../context/FilterContext";
 import { useLoading } from "../context/LoadingContext";
 import { debounce } from "lodash";
@@ -8,7 +8,7 @@ const useTask = () => {
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState(null);
 
-  const filter = useFilter();
+  const { searchQuery, sortBy } = useFilter();
 
   const { startLoading, stopLoading } = useLoading();
 
@@ -19,7 +19,7 @@ const useTask = () => {
       const newTask = {
         title,
         completed: false,
-        categories
+        categories,
       };
 
       try {
@@ -27,6 +27,7 @@ const useTask = () => {
         const { data } = await api.post("/tasks", newTask);
         setTasks((prev) => [...prev, data]);
       } catch (error) {
+        setError(error.message);
         console.log(error.message);
       } finally {
         stopLoading();
@@ -42,6 +43,7 @@ const useTask = () => {
         await api.delete(`/tasks/${id}`);
         setTasks((prev) => prev.filter((itemTask) => itemTask.id !== id));
       } catch (error) {
+        setError(error.message);
         console.log(error.message);
       } finally {
         stopLoading();
@@ -50,28 +52,27 @@ const useTask = () => {
     [startLoading, stopLoading]
   );
 
-  const fetchTasks = useCallback(
-    debounce(async () => {
-      try {
-        startLoading();
-        const params = {};
-        if (filter.searchQuery) {
-          params.title = `*${filter.searchQuery}*`;
-        }
-        if (filter.sortBy) {
-          params.sortBy = filter.sortBy;
-        }
-        const { data } = await api.get("/tasks", { params });
-        console.log("API response:", data);
-        setTasks(data);
-      } catch (error) {
-        setError(error.message);
-        console.error("Fetch error:", error.message);
-      } finally {
-        stopLoading();
+  const fetchTasks = useCallback(async () => {
+    try {
+      const params = {};
+      if (searchQuery) {
+        params.title = `*${searchQuery}*`;
       }
-    }, 500),
-    [filter.searchQuery, filter.sortBy] // Зависимости для debounce
+      if (sortBy) {
+        params.sortBy = sortBy;
+      }
+      const { data } = await api.get("/tasks", { params });
+      console.log("API response:", data);
+      setTasks(data);
+    } catch (error) {
+      setError(error.message);
+      console.error("Fetch error:", error.message);
+    } 
+  }, [searchQuery, sortBy]);
+
+  const debouncedFetchTasks = useMemo(
+    () => debounce(fetchTasks, 500),
+    [fetchTasks]
   );
 
   const updateFieldTask = useCallback(
@@ -87,6 +88,7 @@ const useTask = () => {
           )
         );
       } catch (error) {
+        setError(error.message);
         console.error("Ошибка при обновлении задачи:", error.message);
       } finally {
         stopLoading();
@@ -105,6 +107,13 @@ const useTask = () => {
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  useEffect(() => {
+    debouncedFetchTasks();
+    return () => {
+      debouncedFetchTasks.cancel();
+    };
+  }, [debouncedFetchTasks]);
 
   return {
     tasks,
